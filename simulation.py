@@ -7,21 +7,30 @@ parser = argparse.ArgumentParser(description = 'Gerenciador de argumentos')
 parser.add_argument('-n', default='3', required=False, help='quantidade de camadas de grafeno')
 args = parser.parse_args()
 
-# layers = ['3graphene+doping=0.1,eta=1e-3']
-layers_name = f'graphene+doping=0.15 {args.n}H-MoS2 graphene+doping=0.15'
-layers = [layers_name]
-print(layers)
+layers = ['graphene+doping=0.15', '3H-MoS2', 'graphene+doping=0.15']
+het = make_heterostructure(layers, frequencies=[1e-5, 0.2, 200], momenta=[0.0001, 0.02, 200])
+het.get_plasmon_eigenmodes(filename='graphenemodes.npz')
 
-# het = make_heterostructure(layers, frequencies=[1e-5, 0.2, 500],
-#                            momenta=[0.0001, 0.02, 300])
-# het.get_plasmon_eigenmodes(filename='graphenemodes.npz')
+data = np.load('graphenemodes.npz')
 
-# data = np.load('graphenemodes.npz')
+q_q = data['q_q']
+w_w = data['omega_w']
+eig_qwl = data['eig']
+inveig_qw = - np.sum(1 / eig_qwl, axis=-1).imag
 
-# q_q = data['q_q']
-# w_w = data['omega_w']
-# eig_qwl = data['eig']
-# inveig_qw = - np.sum(1 / eig_qwl, axis=-1).imag
+nq = len(q_q)
+
+arq_test = open('Plasmon Modes ' + str(save_plots) +'.dat', "w") 
+for iq in range(nq):
+    freqs = np.array(omega0[iq])
+    plt.plot([q_q[iq], ] * len(freqs), freqs, 'k.')
+    arq_test.write("{}".format(q_q[iq]))
+    for waux in freqs:
+            arq_test.write(",{}".format(waux))
+    arq_test.write("\n")
+    plt.ylabel(r'$\hbar\omega$ (eV)')
+    plt.xlabel(r'q (Å$^{-1}$)')
+arq_test.close()
 
 # plt.figure(figsize=(3.4, 2.5))
 # plt.pcolor(q_q, w_w, inveig_qw.T)
@@ -29,4 +38,4 @@ print(layers)
 # plt.xlabel(r'$q$ (Å$^{-1}$)')
 # plt.ylabel(r'$\hbar\omega$ (eV)')
 # plt.tight_layout()
-# plt.savefig('graphene-multilayer-modes.png', dpi=600)
+# plt.savefig('graphene-multilayer-modes-teste.png', dpi=600)

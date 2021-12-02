@@ -8,7 +8,8 @@ __pycache__/
 dados/
 *.png
 .DS_STORE
-
+figs/
+output_data/
 
 # C extensions
 *.so
